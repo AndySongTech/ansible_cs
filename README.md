@@ -13,7 +13,7 @@
 - Ansible Roles
 
 ### 运维自动化发展历程及技术应用
-![image](https://note.youdao.com/yws/res/100100/6F5B086A36464AF29DC98BEED570F3C1)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/1.png)
 
 ### 企业实际应用场景分析
 ```
