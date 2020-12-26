@@ -74,7 +74,7 @@ Dev开发环境
 ```
 
 ### 运维自动化发展历程及技术应用
-![image](https://note.youdao.com/yws/res/100104/E8D4C3F76C214F7EA908F5AD59218D32)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/2.png)
 
 ### 自动化运维应用场景
 ```
@@ -113,7 +113,7 @@ Michael DeHaan（ Cobbler 与 Func 作者）
 官方文档：https://docs.ansible.com/
 同类自动化工具GitHub关注程度（2016-07-10）
 ```
-![image](https://note.youdao.com/yws/res/100107/D651B3E163FC4316970259344AA207AB)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/3.png)
 
 ### 特性
 ```
@@ -132,7 +132,7 @@ Michael DeHaan（ Cobbler 与 Func 作者）
 ```
 
 ### Ansible架构
-![image](https://note.youdao.com/yws/res/100099/391475DC87174BDDB90DA6D102152C03)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/4.png)
 ```
 ansible的作用以及工作结构
 1、ansible简介：
@@ -151,7 +151,7 @@ ansible是基于模块工作的，本身没有批量部署的能力。
 2、ansible的架构：连接其他主机默认使用ssh协议	
 ```
 ### Ansible工作原理
-![image](https://note.youdao.com/yws/res/100103/AA46E01927FE4081962455C8FCC8FD00)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/5.png)
 
 ### Ansible主要组成部分
 ```
@@ -617,7 +617,7 @@ Ansible-console：2.0+新增，可交互执行命令，支持tab  (了解)
 > Playbook采用YAML语言编写
 ```
 ### playbook图解
-![image](https://note.youdao.com/yws/res/100098/FD38F2B4BE0B49578DCC4CB58E218543)  
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/6.png)  
 ```
 用户通过ansible命令直接调用yml语言写好的playbook,playbook由多条play组成
 每条play都有一个任务(task)相对应的操作,然后调用模块modules，应用在主机清单上,通过ssh远程连接
@@ -709,7 +709,7 @@ YAML的语法和其他高阶语言类似，并且可以简单表达清单、散�
 ```
 
 ### 三种常见的数据交换格式
-![image](https://note.youdao.com/yws/res/100106/8B5EADE22C804A65A1D9027206BD15F4)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/7.png)
 
 
 ### Playbook核心元素
@@ -1533,7 +1533,7 @@ tasks:
       template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
       when: ansible_distribution_major_version == "7"
 ```
-![image](https://note.youdao.com/yws/res/100097/A6150393F3CF41DEAFD7A7002C2F952E)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/8.png)
 ### 迭代：with_items
 ```
 迭代：当有需要重复性执行的任务时，可以使用迭代机制
@@ -1779,7 +1779,7 @@ roles/
 ```
 
 ### Ansible Roles目录编排
-![image](https://note.youdao.com/yws/res/100101/63539E099AD1483D87CD28CBD473463B) 
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/9.png) 
 
 
 
@@ -2060,10 +2060,10 @@ roles/
 
 ### Roles案例
 Roles目录编排    
-![image](https://note.youdao.com/yws/res/100102/31BB6620C07C4E8DAEC14CB20CF8C573)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/10.png)
 
 Playbook中调用     
-![image](https://note.youdao.com/yws/res/100105/B2206BA3F50D46ACBCC941F778A2C845)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/11.png)
 
 ### playbook调用角色
 ```
