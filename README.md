@@ -240,7 +240,14 @@ pip安装： pip是安装Python包的管理器，类似yum
     /usr/bin/ansible-vault    文件加密工具
     /usr/bin/ansible-console  基于Console界面与用户交互的执行工具
 ```
+### 通过host ip 控制主机
+```
+这里使用的是ping模块而非我们通常用的ping命令，它用的不是ICMP而是SSH
+ansible 192.168.1.100 -m ping   # 由于没有配置inventory和ansible_ssh_private_key_file,这里会连接失败
+ansible 192.168.1.100 -m ping -k   # -m 代表使用模块， -k 代表通过password连接主机(ask for connection password)
+ansible 192.168.1.100,192.168.1.101 -m ping -k # 发送ping到多台主机，口令密码必须一样，无法输入多个密码，所以不使用inventory 有很大的局限性。 
 
+```
 ### 主机清单inventory
 ```
 Inventory 主机清单
@@ -270,6 +277,10 @@ inventory文件遵循INI文件风格，中括号中的字符为组名。
     
     [dbsrvs]
     db-[a:f].example.com     dba-dbff
+    
+通过组名来连接主机：
+ansible webservers -m ping -k  # 测试和webservers组里的主机连通性
+
 ```
 
 ### ansible 配置文件
@@ -284,22 +295,28 @@ vim /etc/ansible/ansible.cfg
 #remote_tmp    = $HOME/.ansible/tmp      # 临时py命令文件存放在远程主机目录
 #local_tmp     = $HOME/.ansible/tmp      # 本机的临时命令执行目录  
 #forks         = 5                       # 默认并发数,同时可以执行5次
+#poll_interval = 15                      # 默认多久拉一次数据
 #sudo_user     = root                    # 默认sudo 用户
 #ask_sudo_pass = True                    # 每次执行ansible命令是否询问ssh密码
 #ask_pass      = True                    # 每次执行ansible命令是否询问ssh口令
 #remote_port   = 22                      # 远程主机的端口号(默认22)
 
 建议优化项： 
-host_key_checking = False               # 检查对应服务器的host_key，建议取消注释
-log_path=/var/log/ansible.log           # 日志文件,建议取消注释
+host_key_checking = False               # 检查对应服务器的host_key，建议取消注释, 不然每个host都需要ssh一次（写入到~/.ssh/known_hosts）
+log_path=/var/log/ansible.log           # 建议启用日志文件,取消注释
 module_name   = command                 # 默认模块
 ```
 
 ### ansible系列命令
 ```
 Ansible系列命令
-    ansible ansible-doc ansible-playbook ansible-vault ansible-console
-    ansible-galaxy ansible-pull
+    ansible: ansible 的主命令
+    ansible-doc: ansible 的模块文档命令，类似于man命令
+    ansible-playbook: ansible用户执行playbook的命令
+    ansible-vault: ansible 用于加密的命令
+    ansible-console: ansible 用户提供交互界面的命令
+    ansible-galaxy: ansible 用户查看优秀样例的命令
+    ansible-pull: ansilbe pull 命令
 
 ansible-doc: 显示模块帮助
     ansible-doc [options] [module...]
@@ -309,8 +326,30 @@ ansible-doc: 显示模块帮助
 
 示例：
     ansible-doc -l      列出所有模块
+    ansible-doc -l | wc -l 统计有多少模块
     ansible-doc ping    查看指定模块帮助用法
     ansible-doc -s ping 查看指定模块帮助用法
+    ansible-doc -l | grep -i cisco 显示关于Cisco的模块
+[root@andycentos bin]# ansible-doc -l | grep -i meraki   # 显示关于Meraki的模块
+meraki_organization                                           Manage organizations in the Meraki cloud
+meraki_static_route                                           Manage static routes in the Meraki cloud
+meraki_malware                                                Manage Malware Protection in the Meraki cloud
+meraki_switchport                                             Manage switchports on a switch in the Meraki cloud
+meraki_admin                                                  Manage administrators in the Meraki cloud
+meraki_mr_l3_firewall                                         Manage MR access point layer 3 firewalls in the Meraki cloud
+meraki_content_filtering                                      Edit Meraki MX content filtering policies
+meraki_webhook                                                Manage webhooks configured in the Meraki cloud
+meraki_config_template                                        Manage configuration templates in the Meraki cloud
+meraki_snmp                                                   Manage organizations in the Meraki cloud
+meraki_syslog                                                 Manage syslog server settings in the Meraki cloud
+meraki_nat                                                    Manage NAT rules in Meraki cloud
+meraki_network                                                Manage networks in the Meraki cloud
+meraki_mx_l7_firewall                                         Manage MX appliance layer 7 firewalls in the Meraki cloud
+meraki_vlan                                                   Manage VLANs in the Meraki cloud
+meraki_device                                                 Manage devices in the Meraki cloud
+meraki_ssid                                                   Manage wireless SSIDs in the Meraki cloud
+meraki_firewalled_services                                    Edit firewall policies for administrative network services
+meraki_mx_l3_firewall                                         Manage MX appliance layer 3 firewalls in the Meraki cloud
 ```
 
 ### ansible
@@ -333,7 +372,12 @@ ansible +被管理的主机(ALL) +模块  +参数
     -K, --ask-become-pass  提示输入sudo时的口令
 ```
 ```
-ansible all --list  列出所有主机
+ansible all --list-hosts    # 列出所有主机(--list 和--list-hosts一样)
+ansilbe webservers --list   # 列出webservers组的主机
+ansible all -m ping -k      # 以当前用户连接主机
+ansible all -m -u andy -k   # 以andy这个用户连接主机
+anaible all -u andy -k -m command -a 'cat /etc/shadow'   # 以andy用户执行命令，这里-m command可以省略，应为默认模块就是command
+anaible all -u andy -k -m command -a 'cat /etc/shadow' -b -K # -b以root用户权限运行命令，类似于sudo, -K 要求输入密码v
 ping模块: 探测网络中被管理主机是否能够正常使用  走ssh协议
           如果对方主机网络正常,返回pong
 ansible-doc -s ping   查看ping模块的语法 
@@ -344,7 +388,9 @@ ansible-doc -s ping   查看ping模块的语法
     ansible all -m ping -k
 
 2> 或者实现基于key验证 将公钥ssh-copy-id到被管理的主机上 , 实现免密登录
-   ansible all -m ping
+   ssh-keygen   # 生成公钥和私钥
+   ssh-copy-id 192.168.1.100 # 发送公钥到remote host
+   ansible all -m ping  
 ```
 
 ### ansible的Host-pattern
@@ -371,7 +417,7 @@ ansible的Host-pattern
         ansible 'websrvs:dbsrvs:&appsrvs:!ftpsrvs' –m ping
     正则表达式
         ansible "websrvs:&dbsrvs" –m ping
-        ansible "~(web|db).*\.magedu\.com" –m ping
+        ansible "~(web|db).*\.domain\.com" –m ping # 应用于以web或db开头和包含domain.com的主机
 ```
 
 ### ansible命令执行过程
