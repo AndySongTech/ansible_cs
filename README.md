@@ -431,10 +431,10 @@ ansible命令执行过程
     5. 执行并返回结果
     6. 删除临时py文件，sleep 0退出
 
-执行状态：
-    绿色：执行成功并且不需要做改变的操作
-    黄色：执行成功并且对目标主机做变更
-    红色：执行失败
+执行状态：颜色是在配置文件中定义的（etc/ansible/ansible.cfg）
+    绿色-ok：执行成功并且不需要做改变的操作
+    黄色-changed：执行成功并且对目标主机做变更
+    红色-error：执行失败
 ```
 
 ### ansible使用示例
@@ -459,12 +459,16 @@ ansible ping模块测试连接
 
 Command：在远程主机执行命令，默认模块，可忽略-m选项
     > ansible srvs -m command -a 'service vsftpd start'
-    > ansible srvs -m command -a 'echo adong |passwd --stdin 123456'
-此命令不支持 $VARNAME < > | ; & 等,用shell模块实现
+    > ansible srvs -m command -a 'echo andy |passwd --stdin 123456'
+Command命令不支持 $VARNAME < > | ; & 等, 要用shell模块实现
 
     chdir:   进入到被管理主机目录
-    creates: 如果有一个目录是存在的,步骤将不会运行Command命令
+    creates: 如果有一个目录不存在,将会运行Command命令
+    removes: 如果有一个目录不存在,将不会运行Command命令
+        ansible all -a "removes=/etc/fs cat /etc/fstab"   # cat命令不会执行
     ansible websrvs -a 'chdir=/data/ ls'
+ 
+    
 
 Shell：和command相似，用shell执行命令
     > ansible all -m shell  -a 'getenforce'  查看SELINUX状态
