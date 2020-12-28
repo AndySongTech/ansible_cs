@@ -146,7 +146,7 @@ ansible是基于模块工作的，本身没有批量部署的能力。
     (2)、host inventory：指定操作的主机，是一个配置文件里面定义监控的主机；
     (3)、各种模块核心模块、command模块、自定义模块；
     (4)、借助于插件完成记录日志邮件等功能；
-    (5)、playbook：剧本执行多个任务时，非必需可以让节点一次性运行多个任务。
+    (5)、playbook：剧本执行多个任务时，可以让节点一次性运行多个任务。
 
 2、ansible的架构：连接其他主机默认使用ssh协议	
 ```
@@ -205,7 +205,7 @@ rpm包安装: EPEL源
     python setup.py build
     python setup.py install
     mkdir /etc/ansible
-    cp -r examples/* /etc/ansible
+    cp -r examples/* /etc/ansible   # MacOS上用homebre安装完ansible后，默认不会创建/etc/ansible子目录文件，需要手动copy一份或手动创建。
 
 
 Git方式:
@@ -310,13 +310,13 @@ module_name   = command                 # 默认模块
 ### ansible系列命令
 ```
 Ansible系列命令
-    ansible: ansible 的主命令
-    ansible-doc: ansible 的模块文档命令，类似于man命令
-    ansible-playbook: ansible用户执行playbook的命令
-    ansible-vault: ansible 用于加密的命令
-    ansible-console: ansible 用户提供交互界面的命令
-    ansible-galaxy: ansible 用户查看优秀样例的命令
-    ansible-pull: ansilbe pull 命令
+    ansible: ansible 的主命令，主程序，临时命令执行工具
+    ansible-doc: ansible 的模块文档命令，类似于man命令，查看配置文档，模块功能查看
+    ansible-playbook: ansible用于执行playbook，定制自动化任务，编排剧本工具
+    ansible-vault: ansible 用于文件加密的命令
+    ansible-console: ansible 用于提供交互界面的命令，基于Console界面与用户交互的执行工具
+    ansible-galaxy: ansible 用于查看/下载/上传优秀代码或Roles模块的官网平台
+    ansible-pull: ansilbe 远程执行命令的工具
 
 ansible-doc: 显示模块帮助
     ansible-doc [options] [module...]
@@ -418,6 +418,7 @@ ansible的Host-pattern
     正则表达式
         ansible "websrvs:&dbsrvs" –m ping
         ansible "~(web|db).*\.domain\.com" –m ping # 应用于以web或db开头和包含domain.com的主机
+        注意：此处为双引号
 ```
 
 ### ansible命令执行过程
@@ -432,12 +433,12 @@ ansible命令执行过程
     6. 删除临时py文件，sleep 0退出
 
 执行状态：颜色是在配置文件中定义的（etc/ansible/ansible.cfg）
-    绿色-ok：执行成功并且不需要做改变的操作
-    黄色-changed：执行成功并且对目标主机做变更
+    绿色-ok：执行成功并且不需要做改变的操作(以前成功执行过)
+    黄色-changed：执行成功并且对目标主机做变更（第一次成功执行）
     红色-error：执行失败
 ```
 
-### ansible使用示例
+### ansible使用示例汇总
 ```
 示例
     以wang用户执行ping存活检测
@@ -448,9 +449,17 @@ ansible命令执行过程
         ansible all -m ping -u wang -k -b --become-user=mage
     以wang sudo至root用户执行ls
         ansible all -m command -u wang -a 'ls /root' -b --become-user=root -k -K
+    ansible ping模块测试连接
+        ansible 192.168.38.126,192.168.38.127 -m ping -k 
+ansible all --list # 列出所有inventory主机
+ansible test --list # 列出单个分组的主机
+ansilbe-doc -a   # 列出所有模块
+ansible-doc -l   # 列出可用模块 
+ansible-doc ping  # 显示ping模块信息
+ansible-doc -s ping # 简洁显示ping模块信息
+ansible-doc -l | wc -l  # 统计可用的模块数量
+ansible-doc -l |grep -i cisco # 查看Cisco相关的模块
 
-ansible ping模块测试连接
-    ansible 192.168.38.126,192.168.38.127 -m ping -k 
 ```
 
 ### ansible常用模块
@@ -463,8 +472,8 @@ Command：在远程主机执行命令，默认模块，可忽略-m选项
 Command命令不支持 $VARNAME < > | ; & 等, 要用shell模块实现
 
     chdir:   进入到被管理主机目录
-    creates: 如果有一个目录不存在,将会运行Command命令
-    removes: 如果有一个目录不存在,将不会运行Command命令
+    creates: 如果有一个目录不存在,将会运行Command命令，存在则不运行
+    removes: 如果有一个目录不存在,将不会运行Command命令，存在则运行
         ansible all -a "removes=/etc/fs cat /etc/fstab"   # cat命令不会执行
     ansible websrvs -a 'chdir=/data/ ls'
  
