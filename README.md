@@ -463,7 +463,7 @@ ansible-doc -l |grep -i cisco # 查看Cisco相关的模块
 ```
 
 ### ansible常用模块
-```
+```shell
 模块文档：https://docs.ansible.com/ansible/latest/modules/modules_by_category.html
 
 Command：在远程主机执行命令，默认模块，可忽略-m选项
@@ -488,13 +488,28 @@ Shell：和command相似，用shell执行命令
     这些复杂命令，即使使用shell也可能会失败，
     解决办法：写到脚本时，copy到远程执行，再把需要的结果拉回执行命令的机器
 
-    修改配置文件,使shell作为默认模块    
+    由于shell比command支持的命令更多，建议修改配置文件,使shell作为默认模块    
         vim /etc/ansible/ansible.cfg
         module_name = shell
 
 Script：在远程主机上运行ansible服务器上的脚本
-    > -a "/PATH/TO/SCRIPT_FILE"
-    > ansible websrvs -m script -a /data/test.sh
+    > -a "/PATH/TO/SCRIPT_FILE"   # -a 跟执行脚本命令，可以是可执行文件，也可以是 bash ~/ansible/andy.sh
+    > vim /data/test.sh
+    > chmod -x test.sh
+    > ansible websrvs -m script -a '/data/test.sh'  # 建议把执行命令用''单引号引起来
+[root@andycentos ansible]# ansible test -m script -a '/root/ansible/andy.sh'
+192.168.31.49 | CHANGED => {
+    "changed": true,
+    "rc": 0,
+    "stderr": "Shared connection to 192.168.31.49 closed.\r\n",
+    "stderr_lines": [
+        "Shared connection to 192.168.31.49 closed."
+    ],
+    "stdout": "andy_ansible\r\n",
+    "stdout_lines": [
+        "andy_ansible"
+    ]
+}
 
 Copy：从主控端复制文件到远程主机
       src : 源文件  指定拷贝文件的本地路径  (如果有/ 则拷贝目录内容,比拷贝目录本身)
@@ -503,30 +518,103 @@ Copy：从主控端复制文件到远程主机
       backup: 备份源文件
       content: 代替src  指定本机文件内容,生成目标主机文件
       
-      > ansible websrvs -m copy -a "src=/root/test1.sh dest=/tmp/test2.showner=wang mode=600 backup=yes"
+      > ansible test -m copy -a "src=/root/ansible/andy.sh dest=/root/ansible/ backup=yes mode=766 owner=andy"
         如果目标存在，默认覆盖，此处指定先备份
       > ansible websrvs -m copy -a "content='test content\nxxx' dest=/tmp/test.txt"
         指定内容，直接生成目标文件
+[root@andycentos ansible]# ansible test -m copy -a "src=/root/ansible/andy.sh dest=/root/ansible/ backup=yes mode=766 owner=andy"
+192.168.31.49 | CHANGED => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/libexec/platform-python"
+    },
+    "changed": true,
+    "checksum": "4080c03edf24ad1ca3a9e83c54a363236df4432b",
+    "dest": "/root/ansible/andy.sh",
+    "gid": 0,
+    "group": "root",
+    "md5sum": "6c65510d520b68b9ef4d5f76552e8a98",
+    "mode": "0766",
+    "owner": "andy",
+    "secontext": "system_u:object_r:admin_home_t:s0",
+    "size": 21,
+    "src": "/root/.ansible/tmp/ansible-tmp-1609166065.04-8413-20930953886869/source",
+    "state": "file",
+    "uid": 1001
+}
 
-Fetch：从远程主机提取文件至主控端，copy相反，目前不支持目录,可以先打包,再提取文件
+[root@andycentos ansible]# ansible test -a 'ls -l /root/ansible'  # 查看变更是否成功
+192.168.31.49 | CHANGED | rc=0 >>
+total 4
+-rwxrw-rw-. 1 andy root 21 Dec 28 22:34 andy.sh   # copy成功，owner已变更为andy, 权限也是766
+
+[root@andycentos ansible]# ansible test -m copy -a "content='Hello World' dest=/root/ansible/file1.txt"    
+192.168.31.49 | CHANGED => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/libexec/platform-python"
+    },
+    "changed": true,
+    "checksum": "0a4d55a8d778e5022fab701977c5d840bbc486d0",
+    "dest": "/root/ansible/file1.txt",
+    "gid": 0,
+    "group": "root",
+    "md5sum": "b10a8db164e0754105b7a99be72e3fe5",
+    "mode": "0644",
+    "owner": "root",
+    "secontext": "system_u:object_r:admin_home_t:s0",
+    "size": 11,
+    "src": "/root/.ansible/tmp/ansible-tmp-1609167917.5-8556-94475849897297/source",
+    "state": "file",
+    "uid": 0
+}
+[root@andycentos ansible]# ansible test -a "cat /root/ansible/file1.txt"
+192.168.31.49 | CHANGED | rc=0 >>
+Hello World
+
+Fetch：从远程主机提取文件至主控端，copy相反，目前不支持目录,通配符,可以先打包,再提取文件
      > ansible websrvs -m fetch -a 'src=/root/test.sh dest=/data/scripts'
      会生成每个被管理主机不同编号的目录,不会发生文件名冲突
      
      > ansible all -m shell -a 'tar jxvf test.tar.gz /root/test.sh'
      > ansible all -m fetch -a 'src=/root/test.tar.gz dest=/data/'
+     
+[root@andycentos ansible]# ansible test -m fetch -a "src=/var/log/lastlog   dest=/root/ansible/log"  # 把远程主机的lastlog文件copy到local host的log文件夹中
+192.168.31.49 | CHANGED => {
+    "changed": true,
+    "checksum": "f4e904f6aa48091670c679d1b8bd91b5fcda6ca9",
+    "dest": "/root/ansible/log/192.168.31.49/var/log/lastlog",
+    "md5sum": "7d3c78deffef3b4ef09ddbf6fac92705",
+    "remote_checksum": "f4e904f6aa48091670c679d1b8bd91b5fcda6ca9",
+    "remote_md5sum": null
+}
+[root@andycentos ansible]# yum install -y tree  # 安装tree文件
+[root@andycentos ansible]# tree log     # 查看fetch结果
+log
+└── 192.168.31.49
+    └── var
+        └── log
+            └── lastlog
+
+3 directories, 1 file
 
 File：设置文件属性
-    path: 要管理的文件路径 (强制添加)
+> ansible-doc file # 查看详细的命令文档
+    path: 要管理的文件路径 (强制添加)(Aliases: dest, name)
     recurse: 递归,文件夹要用递归
-    src:  创建硬链接,软链接时,指定源目标,配合'state=link' 'state=hard' 设置软链接,硬链接
+    src/dest:  创建硬链接,软链接时,指定源目标,配合'state=link' 'state=hard' 设置软链接,硬链接
     state: 状态
           absent 缺席,删除
-          
-    > ansible websrvs -m file -a 'path=/app/test.txt state=touch'       创建文件
-    > ansible websrvs -m file -a "path=/data/testdir state=directory"   创建目录    
-    > ansible websrvs -m file -a "path=/root/test.sh owner=wang mode=755"  设置权限755
+          directory 创建目录
+          touch  创建文件
+          link 创建软链接
+          hard 创建硬链接
+                  
+    > ansible websrvs -m file -a 'name=/app/andy.txt state=touch'       创建文件
+    > ansible websrvs -m file -a 'name=/app/andy.txt state=absent'      删除文件
+    > ansible websrvs -m file -a "name=/data/testdir state=directory"   创建目录 
+    > ansible websrvs -m file -a "name=/data/testdir state=absent"      删除目录    
+    > ansible websrvs -m file -a "name=/root/test.sh owner=andy mode=755"  设置权限755
     > ansible websrvs -m file -a 'src=/data/testfile dest=/data/testfile-link state=link' 创建软链接
-    
+    > ansible websrvs -m file -a 'src=/data/testfile dest=/data/testfile-link state=hard' 创建硬链接
     
 unarchive：解包解压缩，有两种用法：
     1、将ansible主机上的压缩包传到远程主机后解压缩至特定目录，设置copy=yes.
