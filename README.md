@@ -607,6 +607,8 @@ File：设置文件属性
           touch  创建文件
           link 创建软链接
           hard 创建硬链接
+          mode：设置文件权限
+          owner: 设置文件所有者
                   
     > ansible websrvs -m file -a 'name=/app/andy.txt state=touch'       创建文件
     > ansible websrvs -m file -a 'name=/app/andy.txt state=absent'      删除文件
@@ -628,15 +630,53 @@ unarchive：解包解压缩，有两种用法：
         dest：远程主机上的目标路径
         mode：设置解压缩后的文件权限
     
-    示例：
-        ansible websrvs -m unarchive -a 'src=foo.tgz dest=/var/lib/foo'  
-          #默认copy为yes ,将本机目录文件解压到目标主机对应目录下
-        ansible websrvs -m unarchive -a 'src=/tmp/foo.zip dest=/data copy=no mode=0777'
-          # 解压被管理主机的foo.zip到data目录下, 并设置权限777
-        ansible websrvs -m unarchive -a 'src=https://example.com/example.zip dest=/data copy=no'
+示例：
+tar -cvzf test.tar.gz test.sh  # 在本地主机上打包需要上传到remote主机上的文件
+[root@andycentos ~]# ansible test -m unarchive -a "src=/root/test.tar.gz dest=/data"
+#默认copy为yes ,将本机目录文件解压到目标主机对应目录下
+    192.168.31.49 | CHANGED => {
+        "ansible_facts": {
+            "discovered_interpreter_python": "/usr/libexec/platform-python"
+        },
+        "changed": true,
+        "dest": "/data",
+        "extract_results": {
+            "cmd": [
+                "/usr/bin/gtar",
+                "--extract",
+                "-C",
+                "/data",
+                "-z",
+                "-f",
+                "/root/.ansible/tmp/ansible-tmp-1609340572.03-10703-61303948981869/source"
+            ],
+            "err": "",
+            "out": "",
+            "rc": 0
+        },
+        "gid": 0,
+        "group": "root",
+        "handler": "TgzArchive",
+        "mode": "0755",
+        "owner": "root",
+        "secontext": "unconfined_u:object_r:default_t:s0",
+        "size": 46,
+        "src": "/root/.ansible/tmp/ansible-tmp-1609340572.03-10703-61303948981869/source",
+        "state": "directory",
+        "uid": 0
+    }
+    [root@andycentos ~]# ansible test -a "ls -l /data"  # 查看文件是否上传成功
+    192.168.31.49 | CHANGED | rc=0 >>
+    total 1
+    -rw-r--r--. 1 root root 1007 Dec 30 10:23 test.sh
+
+[root@andycentos ~]# ansible test -m unarchive -a "src=/root/test.tar.gz dest=/data copy=no owner=andy mode=755"
+# 解压被管理主机的test.tar.gz到data目录下, 并设置owner为andy,权限755
+[root@andycentos ~]# ansible test -m unarchive -a "src=http://xxxx/file.zip dest=/data copy=no owner=andy mode=755"
+# 下载网站文件都remote主机
 
 Archive：打包压缩
-    > ansible all -m archive -a 'path=/etc/sysconfig dest=/data/sysconfig.tar.bz2 format=bz2 owner=wang mode=0777'
+    > ansible test -m archive -a 'path=/etc/sysconfig dest=/data/sysconfig.tar.bz2 format=bz2 owner=andy mode=0777'
     将远程主机目录打包 
         path:   指定路径
         dest:   指定目标文件
@@ -645,8 +685,8 @@ Archive：打包压缩
         mode:   设置权限
 
 Hostname：管理主机名
-    ansible appsrvs -m hostname -a "name=app.adong.com"  更改一组的主机名
-    ansible 192.168.38.103 -m hostname -a "name=app2.adong.com" 更改单个主机名
+    ansible appsrvs -m hostname -a "name=andyansible"  更改一组的主机名，立即生效，类似： hostnamectl set-hostname
+    ansible 192.168.38.103 -m hostname -a "name=andyansible" 更改单个主机名
 
 Cron：计划任务
     支持时间：minute,hour,day,month,weekday
@@ -656,19 +696,31 @@ Cron：计划任务
     删除任务
     > ansible websrvs -m cron -a 'minute=*/10 job='/usr/sbin/ntpdate 172.30.0.100" name=synctime disabled=yes'
     注释任务,不在生效
+    > ansible websrvs -m cron -a 'minute=*/10 job='/usr/sbin/ntpdate 172.30.0.100" name=synctime disabled=no'
+    启用disabled任务
+    > crondtab -l  # 查看当前用户的计划任务
+    > crondtab -e  # edit任务计划
 
 Yum：管理包
+  state: 
+    `present' and `installed' will simply ensure that a desired package is installed.
+    `latest' will update the specified package if it's not of the latest available version.
+    `absent' and `removed' will remove the specified package.
+     Default is `None', however in effect the default action is `present' unless the `autoremove' option is enabled for this module, then `absent' is inferred.
+      
+    ansible-doc yum  # 查看说明文档
     ansible websrvs -m yum -a 'list=httpd'  查看程序列表
-    
     ansible websrvs -m yum -a 'name=httpd state=present' 安装
+    ansible websrvs -m yum -a 'name=httpd state=latest' 安装最新
     ansible websrvs -m yum -a 'name=httpd state=absent'  删除
     可以同时安装多个程序包
     
 Service：管理服务
-    ansible srv -m service -a 'name=httpd state=stopped'  停止服务
-    ansible srv -m service -a 'name=httpd state=started enabled=yes' 启动服务,并设为开机自启
-    ansible srv -m service -a 'name=httpd state=reloaded'  重新加载
-    ansible srv -m service -a 'name=httpd state=restarted' 重启服务
+    ansible-doc service  # 查看说明文档
+    ansible test -m service -a 'name=httpd state=stopped'  停止服务
+    ansible test -m service -a 'name=httpd state=started enabled=yes' 启动服务,并设为开机自启（systemctl enable httpd）
+    ansible test -m service -a 'name=httpd state=reloaded'  重新加载，服务不会中断
+    ansible test -m service -a 'name=httpd state=restarted' 重启服务，一般会导致服务中断
 
 User：管理用户
     home   指定家目录路径
@@ -679,20 +731,18 @@ User：管理用户
     
     ansible websrvs -m user -a 'name=user1 comment="test user" uid=2048 home=/app/user1 group=root'
     ansible websrvs -m user -a 'name=sysuser1 system=yes home=/app/sysuser1'
-    ansible websrvs -m user -a 'name=user1 state=absent remove=yes'  清空用户所有数据
+    ansible websrvs -m user -a 'name=user1 state=absent remove=yes'  清空用户所有数据, 包括home目录
     ansible websrvs -m user -a 'name=app uid=88 system=yes home=/app groups=root shell=/sbin/nologin password="$1$zfVojmPy$ZILcvxnXljvTI2PhP2Iqv1"'  创建用户
     ansible websrvs -m user -a 'name=app state=absent'  不会删除家目录
     
-    安装mkpasswd 
-    yum insatll expect 
-    mkpasswd 生成口令
-    openssl passwd -1  生成加密口令
+    安装mkpasswd密码生成工具 
+    yum insatll expect  # 安装
+    mkpasswd -l 12       # 生成一个12位的密码
+    openssl passwd -1  生成12位加密口令  # -1：MD5加密，用秘钥二次生成openssl密码
     
-
-删除用户及家目录等数据
-    Group：管理组
-        ansible srv -m group -a "name=testgroup system=yes"   创建组
-        ansible srv -m group -a "name=testgroup state=absent" 删除组
+Group：管理组
+    ansible srv -m group -a "name=testgroup system=yes"   创建组
+    ansible srv -m group -a "name=testgroup state=absent" 删除组
 ```
 
 ### ansible系列命令
@@ -2464,7 +2514,7 @@ cat remove_mysql.yml
 
 ansible-playbook  remove_mysql.yml
 ```
-
+本文档为学习笔记，记录个人学习过程和心得，主要内容来自马哥教育培训视频课件。
 
 
 
