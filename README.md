@@ -694,9 +694,9 @@ Cron：计划任务
     创建任务
     > ansible websrvs -m cron -a 'state=absent name=Synctime' 
     删除任务
-    > ansible websrvs -m cron -a 'minute=*/10 job='/usr/sbin/ntpdate 172.30.0.100" name=synctime disabled=yes'
+    > ansible websrvs -m cron -a "minute=*/10 job='/usr/sbin/ntpdate 172.30.0.100' name=synctime disabled=yes"
     注释任务,不在生效
-    > ansible websrvs -m cron -a 'minute=*/10 job='/usr/sbin/ntpdate 172.30.0.100" name=synctime disabled=no'
+    > ansible websrvs -m cron -a "minute=*/10 job='/usr/sbin/ntpdate 172.30.0.100' name=synctime disabled=no"
     启用disabled任务
     > crondtab -l  # 查看当前用户的计划任务
     > crondtab -e  # edit任务计划
