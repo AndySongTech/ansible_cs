@@ -713,15 +713,19 @@ Yum：管理包
     ansible websrvs -m yum -a 'name=httpd state=present' 安装
     ansible websrvs -m yum -a 'name=httpd state=latest' 安装最新
     ansible websrvs -m yum -a 'name=httpd state=absent'  删除
+    ansible websrvs -m yum -a 'name=dstat update_cache=yes' 清空应用缓存
     可以同时安装多个程序包
     
 Service：管理服务
+state: started, stopped, reloaded, restarted
+enable: yes, no
     ansible-doc service  # 查看说明文档
     ansible test -m service -a 'name=httpd state=stopped'  停止服务
     ansible test -m service -a 'name=httpd state=started enabled=yes' 启动服务,并设为开机自启（systemctl enable httpd）
+    systemctl is-enabled httpd    # 确认httpd是否是开机自启动
     ansible test -m service -a 'name=httpd state=reloaded'  重新加载，服务不会中断
     ansible test -m service -a 'name=httpd state=restarted' 重启服务，一般会导致服务中断
-
+    
 User：管理用户
     home   指定家目录路径
     system 指定系统账号
@@ -739,9 +743,12 @@ User：管理用户
     yum insatll expect  # 安装
     mkpasswd -l 12       # 生成一个12位的密码
     openssl passwd -1  生成12位加密口令  # -1：MD5加密，用秘钥二次生成openssl密码
+    or echo $RANDOM|md5sum|cut -c 1-12   # 随机生成12位秘钥 
     
 Group：管理组
+state: present(default), absent
     ansible srv -m group -a "name=testgroup system=yes"   创建组
+    ansible srv -m group -a "name=testgroup state=present gid=666" 创建组
     ansible srv -m group -a "name=testgroup state=absent" 删除组
 ```
 
@@ -753,10 +760,12 @@ ansible-galaxy
       下载相应的roles(角色)
     
     > 列出所有已安装的galaxy
-        ansible-galaxy list
+        ansible-galaxy list  # list all
+        ansible-galaxy list geerlingguy.nginx  # list specified
     
     > 安装galaxy
         ansible-galaxy install geerlingguy.redis
+        ansible-galaxy collection install cisco.meraki
     
     > 删除galaxy
         ansible-galaxy remove geerlingguy.redis
