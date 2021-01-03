@@ -1192,16 +1192,16 @@ Notify此action可用于在每个play的最后被触发，
         - Check Nginx Process
   
   handlers:
-    - name: Restart Nginx
+    - name: Restart Nginx     #调用前面定义的notify名字
       service: name=nginx state=restarted enabled=yes
     - name: Check Nginx process
-      shell: killall -0 nginx > /tmp/nginx.log
+      shell: killall -0 nginx > /tmp/nginx.log   #check服务是否运行，无返回值表示运行
 ```
 
 ### Playbook中tags使用 
 ```
-tage: 添加标签 
-可以指定某一个任务添加一个标签,添加标签以后,想执行某个动作可以做出挑选来执行
+tags: 添加标签 
+可以指定某一个任务添加一个标签,添加标签以后,可以自由选择执行命令
 多个动作可以使用同一个标签
 
 示例：httpd.yml
@@ -1211,7 +1211,7 @@ tage: 添加标签
   tasks:
     - name: Install httpd
       yum: name=httpd state=present
-      tage: install 
+      tags: install 
     - name: Install configure file
       copy: src=files/httpd.conf dest=/etc/httpd/conf/
       tags: conf
@@ -1269,16 +1269,17 @@ ansible-playbook –t rshttpd httpd2.yml
 ```
 变量名：仅能由字母、数字和下划线组成，且只能以字母开头
 变量来源：
-    1> ansible setup facts 远程主机的所有变量都可直接调用 (系统自带变量)
+    1> ansible test -m setup | less 远程主机的所有变量都可直接调用 (系统自带变量)
        setup模块可以实现系统中很多系统信息的显示
-                可以返回每个主机的系统信息包括:版本、主机名、cpu、内存
+       可以返回每个主机的系统信息包括:版本、主机名、cpu、内存
        ansible all -m setup -a 'filter="ansible_nodename"'     查询主机名
        ansible all -m setup -a 'filter="ansible_memtotal_mb"'  查询主机内存大小
        ansible all -m setup -a 'filter="ansible_distribution_major_version"'  查询系统版本
        ansible all -m setup -a 'filter="ansible_processor_vcpus"' 查询主机cpu个数
+       ansible all -m setup -a 'filter="*vcpus*"'   # 支持通配符
     
     2> 在/etc/ansible/hosts(主机清单)中定义变量
-        普通变量：主机组中主机单独定义，优先级高于公共变量(单个主机 )
+        普通变量：主机组中主机单独定义，优先级高于公共变量(单个主机)
         公共(组)变量：针对主机组中所有主机定义统一变量(一组主机的同一类别)
     
     3> 通过命令行指定变量，优先级最高
@@ -1303,7 +1304,16 @@ ansible-playbook –t rshttpd httpd2.yml
     1> 通过{{ variable_name }} 调用变量，且变量名前后必须有空格，有时用“{{ variable_name }}”才生效
 
     2> ansible-playbook –e 选项指定
-       ansible-playbook test.yml -e "hosts=www user=magedu"
+```       ansible-playbook test.yml -e "hosts=test pkname=vsftp"
+---
+- hosts: {{ hosts }}
+  remote_user: root
+  tasks:
+   - name: install package
+     yum: name={{ pkname} } state=latest
+   - name: start package
+     service: name={{pkname}} state=started enabled=yes
+```
 ```
 ```
 在主机清单中定义变量,在ansible中使用变量
