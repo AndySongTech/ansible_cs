@@ -5,7 +5,7 @@
     - name: install Apache service
       yum: name=httpd  state=present
     - name: copy config file
-      file: src=/tmp/httpd/httpd.conf dest=/etc/httpd/conf/
+      copy: src=/tmp/httpd/httpd.conf dest=/etc/httpd/conf/
       notify: restart httpd
     - name: start apache service
       service: name=httpd state=started enabled=yes
