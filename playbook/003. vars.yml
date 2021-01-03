@@ -1,0 +1,15 @@
+---
+- hosts: test
+#引用变量文件
+  vars_files:
+    - vars.yml 
+  tasks:
+    - name: instal package
+      yum: name={{ pack }} state=latest
+    - name: start service
+      service: name={{ service }} state=restarted enable=yes
+      
+#将变量写进单独的配置文件中引用
+#vim vars.yml
+#pack: vsftpd
+#service: vsftpd
