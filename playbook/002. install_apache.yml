@@ -1,15 +1,30 @@
 ---
+#tags:可以指定某一个任务添加一个标签,添加标签以后,可以自由选择执行命令
+#多个动作可以使用同一个标签
 - hosts: all
   remote_user: root
+  vars:
+    http_port: 8080
+    max_clients: 500
   tasks:
     - name: install Apache service
       yum: name=httpd  state=present
+      tags: install
     - name: copy config file
       copy: src=/tmp/httpd/httpd.conf dest=/etc/httpd/conf/
       notify: restart httpd
+      tags: config
     - name: start apache service
       service: name=httpd state=started enabled=yes
+      tags: service
 
   handlers:
     - name: restart httpd     # 调用notify的名字
       service: name=httpd state=restarted
+
+
+# ansible-playbook -t install,config install_apache.yml
+# you also can add a tags for all the tasks
+# - hosts: all
+#   tags: httpd
+#   vars: 
