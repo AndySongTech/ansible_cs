@@ -788,29 +788,34 @@ ansible-playbook  可以引用按照标准的yml语言写的脚本
 ansible-vault  (了解)
 功能：管理加密解密yml文件
     ansible-vault [create|decrypt|edit|encrypt|rekey|view]
-        ansible-vault encrypt hello.yml 加密
-        ansible-vault decrypt hello.yml 解密
-        ansible-vault view hello.yml    查看
-        ansible-vault edit hello.yml    编辑加密文件
+        ansible-vault encrypt hello.yml 加密yaml文件
+        ansible-vault decrypt hello.yml 解密yaml文件
+        ansible-vault view hello.yml    查看yaml文件, 需要type密码
+        ansible-vault edit hello.yml    编辑加密文件， 需要type密码，类似vim
         ansible-vault rekey hello.yml   修改口令
         ansible-vault create new.yml    创建新文件
 
 
-Ansible-console：2.0+新增，可交互执行命令，支持tab  (了解)
+Ansible-console：2.0+新增，可交互执行命令行，支持tab 
 
-    root@test (2)[f:10] $
-    执行用户@当前操作的主机组 (当前组的主机数量)[f:并发数]$
+[root@andycentos ansible]# ansible-console
+Welcome to the ansible console.
+Type help or ? to list commands.
 
-    设置并发数：         forks n   例如： forks 10
-    切换组：             cd 主机组 例如： cd web
-    列出当前组主机列表： list
-    列出所有的内置命令： ?或help
-    示例：
-        root@all (2)[f:5]$ list
-        root@all (2)[f:5]$ cd appsrvs
-        root@appsrvs (2)[f:5]$ list
-        root@appsrvs (2)[f:5]$ yum name=httpd state=present
-        root@appsrvs (2)[f:5]$ service name=httpd state=started
+root@all (1)[f:5]$    # root为执行用户@all为当前操作的主机组 (当前组的主机数量)[f:并发数]$
+
+设置并发数：      forks n   例如： forks 10， # 把并发数改为10
+切换组：         cd 主机组  例如： cd web     # 进入 web inventory组
+列出当前组主机列表： list
+列出所有的内置命令： ?或help
+示例：
+    root@all (1)[f:5]$ list
+    192.168.31.49
+    root@all (1)[f:5]$ cd test
+    root@test (1)[f:5]$
+    root@test (1)[f:5]$ yum name=vsftp state=present
+    root@test (1)[f:5]$ service name=vsftp state=started enabled=yes
+    root@test (1)[f:5]$ exit # 退出
 ```
 
 
@@ -853,17 +858,17 @@ YAML Ain't Markup Language，即YAML不是XML。
 
 ### YAML语法简介
 ```
-> 在单一档案中，可用连续三个连字号(——)区分多个档案。
+> 在单一档案中，可用连续三个连字号(---)区分多个档案。
   另外，还有选择性的连续三个点号( ... )用来表示档案结尾
 > 次行开始正常写Playbook的内容，一般建议写明该Playbook的功能
 > 使用#号注释代码
 > 缩进必须是统一的，不能空格和tab混用
 > 缩进的级别也必须是一致的，同样的缩进代表同样的级别，程序判别配置的级别是通过缩进结合换行来实现的
-> YAML文件内容是区别大小写的，k/v的值均需大小写敏感
+> YAML文件内容是区别大小写的，k/v(key/value)的值均需大小写敏感
 > 多个k/v可同行写也可换行写，同行使用:分隔
 > v可是个字符串，也可是另一个列表[]
 > 一个完整的代码块功能需最少元素需包括 name 和 task
-> 一个name只能包括一个task
+> 一个tasks下可以包含一个或多个name和task, 但一个name只能包括一个task
 > YAML文件扩展名通常为yml或yaml
 ```
 
@@ -922,7 +927,7 @@ YAML的语法和其他高阶语言类似，并且可以简单表达清单、散�
 ```
 Hosts          执行的远程主机列表(应用在哪些主机上)
 
-Tasks          任务集
+Tasks          任务集和
 
 Variables      内置变量或自定义变量在playbook中调用
 
@@ -958,13 +963,13 @@ remote_user:
     也可以通过指定其通过sudo的方式在远程主机上执行任务，其可用于play全局或某任务；
     此外，甚至可以在sudo时使用sudo_user指定sudo时切换的用户
     - hosts: websrvs
-        remote_user: root   (可省略,默认为root)  以root身份连接
+      remote_user: root   (可省略,默认为root)  以root身份连接
       tasks:    指定任务
-    - name: test connection
-        ping:
-        remote_user: magedu
-        sudo: yes           默认sudo为root
-        sudo_user:wang      sudo为wang
+        - name: test connection
+            ping:
+            remote_user: magedu
+            sudo: yes           默认sudo为root
+            sudo_user:wang      sudo为wang
     
 task列表和action
     任务列表task:由多个动作,多个任务组合起来的,每个任务都调用的模块,一个模块一个模块执行
@@ -981,7 +986,7 @@ task列表和action
 tasks：任务列表
 两种格式：
     (1) action: module arguments
-    (2) module: arguments 建议使用  模块: 参数
+    (2) module: arguments 建议使用‘模块: 参数’格式
     注意：shell和command模块后面跟命令，而非key=value
 
 某任务的状态在运行后为changed时，可通过"notify"通知给相应的handlers
@@ -1019,13 +1024,24 @@ tasks:
     --list-hosts     列出运行任务的主机
     --list-tags      列出tag  (列出标签)
     --list-tasks     列出task (列出任务)
-    --limit 主机列表 只针对主机列表中的主机执行
+    --limit          主机列表 只针对主机列表中的主机执行
     -v -vv -vvv      显示过程
 
 示例
-    ansible-playbook hello.yml --check 只检测
-    ansible-playbook hello.yml --list-hosts  显示运行任务的主机
-    ansible-playbook hello.yml --limit websrvs  限制主机
+[root@andycentos ansible]# ansible-playbook -C install_nginx.yml  # check the syntax 
+[root@andycentos ansible]# ansible-playbook --list-hosts install_nginx.yml # list the hosts
+[root@andycentos ansible]# ansible-playbook --list-tags install_nginx.yml  
+[root@andycentos ansible]# ansible-playbook install_nginx.yml --limit test # apply the change to [test] inventory group
+[root@andycentos ansible]# ansible-playbook --list-tasks install_nginx.yml # list the tasks
+playbook: install_nginx.yml
+
+  play #1 (all): all	TAGS: []
+    tasks:
+      install Nginx	TAGS: []
+      add user	TAGS: []
+      start nginx servce	TAGS: []
+      
+    
 ```
 
 ### Playbook VS ShellScripts
@@ -1039,8 +1055,8 @@ yum install --quiet -y httpd
 cp /tmp/httpd.conf /etc/httpd/conf/httpd.conf
 cp/tmp/vhosts.conf /etc/httpd/conf.d/
 # 启动Apache，并设置开机启动
-service httpd start
-chkconfig httpd on
+systemctl start httpd
+systemctl enable httpd
 ```
 ```
 Playbook定义
