@@ -1304,7 +1304,7 @@ ansible-playbook –t rshttpd httpd2.yml
     1> 通过{{ variable_name }} 调用变量，且变量名前后必须有空格，有时用“{{ variable_name }}”才生效
 
     2> ansible-playbook –e 选项指定
-```       ansible-playbook test.yml -e "hosts=test pkname=vsftp"
+     ansible-playbook test.yml -e "hosts=test pkname=vsftp"
 ---
 - hosts: {{ hosts }}
   remote_user: root
@@ -1314,13 +1314,13 @@ ansible-playbook –t rshttpd httpd2.yml
    - name: start package
      service: name={{pkname}} state=started enabled=yes
 ```
-```
+
 ```
 在主机清单中定义变量,在ansible中使用变量
 vim /etc/ansible/hosts
 [appsrvs]
-192.168.38.17 http_port=817 name=www
-192.168.38.27 http_port=827 name=web
+172.16.67.49 http_port=81 name=www
+172.16.67.49 http_port=82 name=web
 
 调用变量
 ansible appsrvs -m hostname -a'name={{name}}'  更改主机名为各自被定义的变量 
@@ -1328,7 +1328,6 @@ ansible appsrvs -m hostname -a'name={{name}}'  更改主机名为各自被定义
 针对一组设置变量
 [appsrvs:vars]
 make="-"
-
 ansible appsrvs -m hostname -a 'name={{name}}{{mark}}{{http_port}}'  ansible调用变量
 
 ```
@@ -1341,7 +1340,22 @@ service: vsftpd
 引用变量文件
 vars_files:
   - vars.yml 
-    
+  
+playbook example:   
+---
+- hosts: test
+#引用变量文件
+  vars_files:
+    - vars.yml 
+  tasks:
+    - name: instal package
+      yum: name={{ pack }} state=latest
+    - name: start service
+      service: name={{ service }} state=restarted enable=yes
+
+变量优先级
+命令行定义的变量优先级 > playbook yaml中定义的变量 > hosts中定义的普通变量 > hosts中定义的组变量 
+
 ```
 
 ### Ansible基础元素
@@ -1509,11 +1523,7 @@ invertory参数：用于定义ansible远程连接目标主机时使用的参数�
     [websrvs]
     192.168.0.1 ansible_ssh_user=root ansible_ssh_pass=magedu
     192.168.0.2 ansible_ssh_user=root ansible_ssh_pass=magedu
-```
 
-### invertory参数
-```
-inventory参数
 ansible基于ssh连接inventory中指定的远程主机时，还可以通过参数指定其交互方式；
 这些参数如下所示：
 ansible_ssh_host
@@ -1676,7 +1686,7 @@ ansible-playbook temnginx.yml
 ### Playbook中template变更替换
 ```
 修改文件nginx.conf.j2 下面行为
-worker_processes {{ ansible_processor_vcpus }};
+worker_processes {{ ansible_processor_vcpus**2 }};  # 根据主机的cpu数量生成work_processes, 这里是vcpu的2次方
 
 cat temnginx2.yml
 - hosts: websrvs
