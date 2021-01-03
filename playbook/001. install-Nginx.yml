@@ -1,0 +1,11 @@
+---
+- hosts: all
+  remote_user: root
+
+  tasks:
+  - name: install Nginx
+    yum: name=nginx state=present
+  - name: add user
+    user: name=nginx state=present group=nginx
+  - name: start nginx servce
+    service: name=nginx state=started enabled=yes
