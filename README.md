@@ -13,7 +13,7 @@
 - Ansible Roles
 
 ### 运维自动化发展历程及技术应用
-![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/1.png)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Images/1.png)
 
 ### 企业实际应用场景分析
 ```
@@ -74,7 +74,7 @@ Dev开发环境
 ```
 
 ### 运维自动化发展历程及技术应用
-![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/2.png)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Images/2.png)
 
 ### 自动化运维应用场景
 ```
@@ -113,7 +113,7 @@ Michael DeHaan（ Cobbler 与 Func 作者）
 官方文档：https://docs.ansible.com/
 同类自动化工具GitHub关注程度（2016-07-10）
 ```
-![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/3.png)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Images/3.png)
 
 ### 特性
 ```
@@ -132,7 +132,7 @@ Michael DeHaan（ Cobbler 与 Func 作者）
 ```
 
 ### Ansible架构
-![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/4.png)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Images/4.png)
 ```
 ansible的作用以及工作结构
 1、ansible简介：
@@ -151,7 +151,7 @@ ansible是基于模块工作的，本身没有批量部署的能力。
 2、ansible的架构：连接其他主机默认使用ssh协议	
 ```
 ### Ansible工作原理
-![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/5.png)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Images/5.png)
 
 ### Ansible主要组成部分
 ```
@@ -828,7 +828,7 @@ root@all (1)[f:5]$    # root为执行用户@all为当前操作的主机组 (当�
 > Playbook采用YAML语言编写
 ```
 ### playbook图解
-![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/6.png)  
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Images/6.png)  
 ```
 用户通过ansible命令直接调用yml语言写好的playbook,playbook由多条play组成
 每条play都有一个任务(task)相对应的操作,然后调用模块modules，应用在主机清单上,通过ssh远程连接
@@ -920,7 +920,7 @@ YAML的语法和其他高阶语言类似，并且可以简单表达清单、散�
 ```
 
 ### 三种常见的数据交换格式
-![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/7.png)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Images/7.png)
 
 
 ### Playbook核心元素
@@ -1775,7 +1775,7 @@ tasks:
       template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
       when: ansible_distribution_major_version == "7"
 ```
-![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/8.png)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Images/8.png)
 ### 迭代：with_items
 ```
 迭代：当有需要重复性执行的任务时，可以使用迭代机制
@@ -2021,7 +2021,7 @@ roles/
 ```
 
 ### Ansible Roles目录编排
-![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/9.png) 
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Images/9.png) 
 
 
 
@@ -2302,10 +2302,10 @@ roles/
 
 ### Roles案例
 Roles目录编排    
-![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/10.png)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Images/10.png)
 
 Playbook中调用     
-![image](https://github.com/AndySongTech/ansible_cs/blob/master/Pics/11.png)
+![image](https://github.com/AndySongTech/ansible_cs/blob/master/Images/11.png)
 
 ### playbook调用角色
 ```
