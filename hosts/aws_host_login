@@ -1,0 +1,12 @@
+Inventory file
+[test]
+54.185.66.100
+[app]
+54.185.66.150
+[db]
+54.185.66.170
+
+[test:vars]
+ansible_connections=ssh
+ansible_ssh_user=centos
+ansible_ssh_private_key_file=/Users/andysong/.ssh/xxx.pem
