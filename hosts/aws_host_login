@@ -10,3 +10,6 @@ Inventory file
 ansible_connections=ssh
 ansible_ssh_user=centos
 ansible_ssh_private_key_file=/Users/andysong/.ssh/xxx.pem
+
+[app:vars]
+ntp_server=ntp.aliyun.com
