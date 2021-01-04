@@ -1,0 +1,12 @@
+---
+#示例：利用template 同步nginx配置文件
+#准备templates/nginx.conf.j2文件
+#vim temnginx.yml
+- hosts: websrvs
+  remote_user: root
+  
+  tasks:
+    - name: template config to remote hosts
+      template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+
+#ansible-playbook temnginx.yml
