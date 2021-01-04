@@ -1,0 +1,37 @@
+---
+# 通过with_items批量创建用户和copy文件
+- hosts: test
+  remote_user: root
+  
+  tasks:
+    - name: add several users
+      user: name={{ item }} state=present groups=wheel   #{{ item }} 系统自定义变量
+      with_items:       # 定义{{ item }} 的值和个数
+        - testuser1
+        - testuser2
+        - testuser3
+    - name: copy file
+      copy: src={{ item }} dest=/tmp/{{ item }}
+      with_items:
+        - file1
+        - file2
+        - file3
+    
+
+---
+# 通过with_items批量安装软件
+- hosts: test
+  remote_user: root
+  
+  tasks:
+    - name: add several users
+      user: name={{ item.name }} state=present groups={{ item.groups }}
+      with_items:
+        - { name: 'testuser1', groups: 'wheel' }
+        - { name: 'testuser2', groups: 'root' }
+    - name: install some packages
+      yum: name={{ item }} state=present
+      with_items:
+        - nginx
+        - memcached
+        - php-fpm
