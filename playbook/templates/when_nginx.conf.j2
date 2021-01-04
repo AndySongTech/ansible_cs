@@ -1,0 +1,12 @@
+---
+# yaml file:
+- hosts: all
+  remote_user: root
+  tasks:
+    -name: copy config file to centos7
+      template: src=/etc/nginx/nginx.conf.os7.j2 dest=/ect/nginx/nginx.conf
+      when: ansible_distribution_major_version == "7"
+    -name: copy config file to centos6
+      template: src=/etc/nginx/nginx.conf.os6.j2 dest=/ect/nginx/nginx.conf
+      when: ansible_distribution_major_version == "6"
+  
