@@ -1,0 +1,13 @@
+修改文件nginx.conf.j2 下面行为
+vim /etc/nginx/nginx.conf 
+worker_processes auto;   # 默认位auto,根据vcpu的个数生成worker_processes
+worker_processes {{ ansible_processor_vcpus**2 }};  # 根据主机的cpu数量生成work_processes, 这里是vcpu的2次方
+worker_processes {{ ansible_processor_vcpus+2 }};   # vcpu个数加2
+cat temnginx2.yml
+- hosts: websrvs
+  remote_user: root
+  tasks:
+    - name: template config to remote hosts
+      template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+
+ansible-playbook temnginx2.yml
