@@ -1835,9 +1835,9 @@ http://docs.ansible.com/playbooks_loops.html
     - name: copy file
       copy: src={{ item }} dest=/tmp/{{ item }}
       with_items:
-    - file1
-    - file2
-    - file3
+        - file1
+        - file2
+        - file3
 - name: yum install httpd
   yum: name={{ item }} state=present
   with_items:
