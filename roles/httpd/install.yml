@@ -1,0 +1,7 @@
+---
+- hosts: test
+  remote_user: root
+
+  tasks:
+   - name: install httpd
+     yum: name=httpd state=latest

@@ -1,0 +1,7 @@
+---
+- hosts: test
+  remote_user: root
+  
+  tasks:
+   - name: httpd config
+     copy: scr=/httpd.conf dest=/etc/httpd/conf/ backup=yes
