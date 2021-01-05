@@ -1918,6 +1918,25 @@ with_itmes 嵌套子变量
 
 ### Playbook中template for if  when循环
 ```
+for:
+{% for i in list %}
+...
+
+{% endfor %}
+
+if:
+{% for i in list %}
+
+    {% if a is b %}
+
+    ....
+
+    {% endif %}
+
+{% endfor %}
+
+
+example: 
 {% for vhost in nginx_vhosts %}
 
 server {    #重复执行server代码
@@ -1942,7 +1961,7 @@ root {{ vhost.root }};
   remote_user: root
   vars:      # 调用变量
     nginx_vhosts:
-      - listen: 8080  #列表 键值对
+      - listen: 8080  #列表键值对
 
 
 //templates/nginx.conf.j2
