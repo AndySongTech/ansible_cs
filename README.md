@@ -2026,8 +2026,6 @@ roles
     如命名不规范维护和传承成本大
     某些功能需多个Playbook，通过includes即可实现
 ```
-
-### Roles
 ```
 角色(roles)：角色集合
 roles/
@@ -2110,8 +2108,8 @@ roles/example_role/meta/main.yml：    roles所有依赖将被正常登入
 ### 实验: 创建httpd角色
 ```
 1> 创建roles目录
-   mkdir roles/{httpd,mysql,redis}/tasks -pv
-   mkdir  roles/httpd/{handlers,files}
+   mkdir -pv roles/{httpd,mysql,redis}/tasks
+   mkdir -pv roles/httpd/{handlers,files}
 
 查看目录结构
 tree roles/
@@ -2127,33 +2125,33 @@ tree roles/
 
 2> 创建目标文件
    cd roles/httpd/tasks/
-   touch install.yml config.yml service.yml
+   touch install.yml config.yml service.yml main.yml index.yml
 
-3> vim install.yml
+3> vim install.yml  # 文件不需要添加hosts 和 remote_user信息
    - name: install httpd package
      yum: name=httpd
      
    vim config.yml
    - name: config file  
-     copy: src=httpd.conf dest=/etc/httpd/conf/ backup=yes 
+     copy: src=httpd.conf dest=/etc/httpd/conf/ backup=yes    # 这里的src是调用roles/httpd/files下的文件
    
    vim service.yml
    - name: start service 
      service: name=httpd state=started enabled=yes
      
-4> 创建main.yml主控文件,调用以上单独的yml文件,
-   main.yml定义了谁先执行谁后执行的顺序
+4> main.yml定义了谁先执行谁后执行的顺序
    vim main.yml
    - include: install.yml
    - include: config.yml
    - include: service.yml
    
 5> 准备httpd.conf文件,放到httpd单独的文件目录下
-   cp /app/ansible/flies/httpd.conf ../files/
+   cp /app/ansible/flies/httpd.conf ../files/   # 用于copy模块调用
    
 6> 创建一个网页
-   vim flies/index.html
-   <h1> welcome to weixiaodong home <\h1>
+   touch roles/httpd/files/index.html
+   vim index.html
+   <h1> Hello World <\h1>
 
 7> 创建网页的yml文件
    vim tasks/index.yml
@@ -2173,15 +2171,15 @@ tree roles/
      service: name=httpd state=restarted
 
 10> 创建文件调用httpd角色
-    cd /app/ansidle/roles
+    cd /app/ansidle/roles  #建在roles的根目录下
     vim role_httpd.yml
     ---
     # httpd role
-    - hosts: appsrvs
+    - hosts: test
       remote_user: root 
 
       roles:       #调用角色
-        - role: httpd  
+        - role: httpd   #调用roles/httpd下的文件
         
 11> 查看目录结构
     tree 
@@ -2256,18 +2254,18 @@ roles/
 
 ### 实验： 创建一个nginx角色
 ```
-建立nginx角色在多台主机上来部署nginx需要安装 创建账号
+建立nginx角色在多台主机上来部署nginx, 需要安装 创建账号
 1> 创建nginx角色目录
      cd /app/ansible/role
-     mkdir nginx{tesks,templates,hanslers} -pv
+     mkdir -vp nginx{tasks,templates,handlers}
 
 2> 创建任务目录
      cd tasks/
-     touch insatll.yml config.yml service.yml file.yml user.yml
-   创建main.yml文件定义任务执行顺序
+     touch install.yml config.yml service.yml file.yml user.yml main.yml
+   编辑main.yml文件定义任务执行顺序
      vim main.yml
      - include: user.yml
-     - include: insatll.yml
+     - include: install.yml
      - include: config.yml
      - include: file.yml
      - include: service.yml
