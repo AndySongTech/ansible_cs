@@ -1826,8 +1826,6 @@ http://docs.ansible.com/playbooks_loops.html
   - rsyncd.secrets
   - rsyncd.conf
 ```
-
-### 示例：迭代
 ```
 - hosts: websrvs
   remote_user: root
@@ -1845,8 +1843,6 @@ http://docs.ansible.com/playbooks_loops.html
     - apr-util
     - httpd
 ```
-
-### 示例：迭代
 ```
 - hosts：websrvs
   remote_user: root
