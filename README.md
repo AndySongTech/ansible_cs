@@ -2572,8 +2572,9 @@ cat remove_mysql.yml
 
 ansible-playbook  remove_mysql.yml
 ```
+```
 本文档为学习笔记，记录个人学习过程和心得，主要内容来自马哥教育培训视频课件。
-
+```
 
 
 
