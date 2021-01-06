@@ -1,6 +1,0 @@
----
-- hosts: test
-  remore_user: root
-
-  roles:
-   - role: httpd
