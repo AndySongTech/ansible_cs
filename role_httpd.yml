@@ -4,3 +4,8 @@
 
   roles:
    - role: httpd
+
+
+#roles:
+#   - {role: httpd, tags: ["web" "httpd"]}
+#   - {role: nginx, tags: ["web" "nginx"]}
