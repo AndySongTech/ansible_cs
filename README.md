@@ -2043,22 +2043,22 @@ roles/
 每个角色，以特定的层级目录结构进行组织
 roles目录结构：
 
-playbook.yml  调用角色
+playbook.yml  调用角色, playbook.yml 文件必须放在和roles同级目录 
 roles/
-  project/ (角色名称)
-    tasks/
-    files/
-    vars/
-    templates/
-    handlers/
-    default/ 不常用
-    meta/    不常用
+  project/   # (角色名称)- 
+    tasks/      
+    files/     
+    vars/       
+    templates/  
+    handlers/   # 存放handler main.yml 文件，调用notify
+    default/    # 不常用
+    meta/       # 不常用
 ```
 
 ### Roles各目录作用
 ```
-/roles/project/ :项目名称,有以下子目录
-    files/ ：存放由copy或script模块等调用的文件
+/roles/project/ :项目名称,有以下子目录,可以是任何名称，例如： httpd, nginx, tomcat, redis, mamcache...
+    files/ ：存放由copy或script模块等调用的文件, 后期可以使用文件的相对路径
     templates/：template模块查找所需要模板文件的目录
     tasks/：定义task,role的基本元素，至少应该包含一个名为main.yml的文件；
             其它的文件需要在此文件中通过include进行包含
@@ -2265,6 +2265,8 @@ roles/
      - include: config.yml
      - include: file.yml
      - include: service.yml
+     
+   # - include: files/httpd/tasks/config.yml      用于调用其他项目的task
 
   
 3> 准备配置文件(centos7、8)
@@ -2289,12 +2291,12 @@ roles/
       when: ansible_distribution_major_version=="8"
       notify: restrat
       
-    vim tasks/file.yml   跨角色调用file.yum文件,实现文件复用
+    vim tasks/file.yml   跨角色调用file.yml文件,实现文件复用
     - name: index.html
       copy: src=roles/httpd/files/index.html dest=/usr/share/nginx/html/ 
    
     vim tasks/service.yml
-    - nmae: start service
+    - name: start service
       service: name=nginx state=started enabled=yes
       
     vim handlers/main.yml
@@ -2514,21 +2516,6 @@ cat /etc/sysconfig/memcached
 交互提示
     prompt
 *暂停（java）
-    wait_for
-Debug
-    debug: msg="This always executes."
-Include
-Template 多值合并
-Template 动态变量配置
-```
-
-### Ansible Roles
-```
-委任
-    delegate_to
-交互提示
-    prompt
-暂停
     wait_for
 Debug
     debug: msg="This always executes."
