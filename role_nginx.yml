@@ -1,0 +1,7 @@
+- hosts: test
+  remote_user: root
+  
+  roles:
+   - role: nginx
+
+# ansible-playbook role_nginx.yml
